@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // bmqa_openqueuestatus.t.cpp                                         -*-C++-*-
-#include <bmqa_openqueuestatus.h>
+#include <z_bmqa_openqueuestatus.h>
 
 // BMQ
 #include <bmqa_queueid.h>
