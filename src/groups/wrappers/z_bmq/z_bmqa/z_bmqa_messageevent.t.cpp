@@ -14,7 +14,7 @@
 // limitations under the License.
 
 // bmqa_messageevent.t.cpp                                            -*-C++-*-
-#include <bmqa_messageevent.h>
+#include <z_bmqa_messageevent.h>
 
 // BMQ
 #include <bmqa_messageiterator.h>
@@ -139,6 +139,22 @@ appendMessage(size_t                    iteration,
 }
 
 }  // close unnamed namespace
+
+
+// ============================================================================
+//                                    TESTS
+// ----------------------------------------------------------------------------
+
+static void test1_breathingTest()
+{
+    mwctst::TestHelper::printTestName("BREATHING TEST");
+
+    MessageEvent ** obj;
+    z_bmqa_MessageEvent__create(&obj);
+
+    z_bmqa_MessageEvent__delete(&obj);
+
+}
 
 
 
