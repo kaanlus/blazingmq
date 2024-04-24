@@ -134,6 +134,75 @@ static void test1_breathingTest()
 }
 
 
+static void test2_comparison()
+// ------------------------------------------------------------------------
+// COMPARISION
+//
+// Concerns:
+//   Exercise 'bmqa::OpenQueueStatus' comparison operators
+//
+// Plan:
+//   1) Create two equivalent 'bmqa::OpenQueueStatus' objects and verify
+//      that they compare equal.
+//   2) Create two non-equivalent 'bmqa::OpenQueueStatus' objects and
+//      verify that they do not compare equal.
+//
+// Testing:
+//   bool operator==(const bmqa::OpenQueueStatus& lhs,
+//                   const bmqa::OpenQueueStatus& rhs);
+//   bool operator!=(const bmqa::OpenQueueStatus& lhs,
+//                   const bmqa::OpenQueueStatus& rhs);
+// ------------------------------------------------------------------------
+{
+    mwctst::TestHelper::printTestName("COMPARISON");
+
+    PV("Equality");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::OpenQueueResult::Enum result =
+            bmqt::OpenQueueResult::e_TIMEOUT;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::OpenQueueStatus obj1(queueId,
+                                   result,
+                                   errorDescription,
+                                   s_allocator_p);
+        bmqa::OpenQueueStatus obj2(obj1, s_allocator_p);
+
+        ASSERT(obj1 == obj2);
+    }
+
+    PV("Inequality");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::OpenQueueResult::Enum result1 =
+            bmqt::OpenQueueResult::e_SUCCESS;
+        const bmqt::OpenQueueResult::Enum result2 =
+            bmqt::OpenQueueResult::e_TIMEOUT;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::OpenQueueStatus obj1(queueId,
+                                   result1,
+                                   errorDescription,
+                                   s_allocator_p);
+        bmqa::OpenQueueStatus obj2(queueId,
+                                   result2,
+                                   errorDescription,
+                                   s_allocator_p);
+
+        ASSERT(obj1 != obj2);
+    }
+}
+
+
 // ============================================================================
 //                                 MAIN PROGRAM
 // ----------------------------------------------------------------------------
