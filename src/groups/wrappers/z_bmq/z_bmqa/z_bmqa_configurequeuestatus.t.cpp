@@ -65,6 +65,52 @@ static void test1_breathingTest()
         z_bmqa_ConfigureQueueStatus__delete(&obj);
     }
 
+    PV("Valued Constructor");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::ConfigureQueueResult::Enum result =
+            bmqt::ConfigureQueueResult::e_UNKNOWN;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::ConfigureQueueStatus obj(queueId,
+                                       result,
+                                       errorDescription,
+                                       s_allocator_p);
+
+        ASSERT_EQ(bool(obj), false);
+        ASSERT_EQ(obj.queueId(), queueId);
+        ASSERT_EQ(obj.result(), result);
+        ASSERT_EQ(obj.errorDescription(), errorDescription);
+    }
+
+    PV("Copy Constructor");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::ConfigureQueueResult::Enum result =
+            bmqt::ConfigureQueueResult::e_TIMEOUT;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::ConfigureQueueStatus obj1(queueId,
+                                        result,
+                                        errorDescription,
+                                        s_allocator_p);
+        bmqa::ConfigureQueueStatus obj2(obj1, s_allocator_p);
+
+        ASSERT_EQ(bool(obj1), bool(obj2));
+        ASSERT_EQ(obj1.queueId(), obj2.queueId());
+        ASSERT_EQ(obj1.result(), obj2.result());
+        ASSERT_EQ(obj1.errorDescription(), obj2.errorDescription());
+    }
+
+
 }
 // ============================================================================
 //                                 MAIN PROGRAM
