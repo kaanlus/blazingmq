@@ -36,8 +36,36 @@
 using namespace BloombergLP;
 using namespace bsl;
 
+// ============================================================================
+//                                    TESTS
+// ----------------------------------------------------------------------------
 
+static void test1_breathingTest()
+// ------------------------------------------------------------------------
+// BREATHING TEST
+//
+// Concerns:
+//   Exercise basic functionality before beginning testing in earnest.
+//   Probe that functionality to discover basic errors.
+//
+// Testing:
+//   Basic functionality.
+// ------------------------------------------------------------------------
+{
+    mwctst::TestHelper::printTestName("BREATHING TEST");
 
+    PV("Default Constructor");
+    {
+        ConfigureQueueStatus ** obj;
+        z_bmqa_ConfigureQueueStatus__create(&obj);
+        ASSERT_EQ(bool(obj), true);
+        ASSERT_EQ(obj.result(), bmqt::ConfigureQueueResult::e_SUCCESS);
+        ASSERT_EQ(obj.errorDescription(), bsl::string("", s_allocator_p));
+
+        z_bmqa_ConfigureQueueStatus__delete(&obj);
+    }
+
+}
 // ============================================================================
 //                                 MAIN PROGRAM
 // ----------------------------------------------------------------------------
