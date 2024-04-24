@@ -203,6 +203,65 @@ static void test2_comparison()
 }
 
 
+static void test3_print()
+// ------------------------------------------------------------------------
+// PRINT
+//
+// Concerns:
+//   Proper behavior of printing 'bmqa::OpenQueueStatus'.
+//
+// Plan:
+//   1. Verify that the 'print' and 'operator<<' methods output the
+//      expected string representations
+//
+// Testing:
+//   OpenQueueStatus::print()
+//   bmqa::operator<<(bsl::ostream& stream,
+//                    const bmqa::OpenQueueStatus& rhs);
+// ------------------------------------------------------------------------
+{
+    s_ignoreCheckDefAlloc = true;
+    // Can't check the default allocator: 'bmqa::OpenQueueStatus::print' and
+    // operator '<<' temporarily allocate a string using the default allocator.
+
+    mwctst::TestHelper::printTestName("PRINT");
+
+    const bmqt::CorrelationId correlationId(2);
+    bmqa::QueueId queueId = bmqa::QueueId(correlationId, s_allocator_p);
+    const bmqt::OpenQueueResult::Enum result =
+        bmqt::OpenQueueResult::e_SUCCESS;
+    const bsl::string errorDescription = bsl::string("ERROR", s_allocator_p);
+
+    // Set URI on the queueId
+    bsl::shared_ptr<bmqimp::Queue>& queue =
+        reinterpret_cast<bsl::shared_ptr<bmqimp::Queue>&>(queueId);
+    queue->setUri(bmqt::Uri("bmq://bmq.test.mem.priority/q1", s_allocator_p));
+
+    bmqa::OpenQueueStatus obj(queueId,
+                              result,
+                              errorDescription,
+                              s_allocator_p);
+
+    PVV(obj);
+    const char* expected = "[ queueId = [ uri = bmq://bmq.test.mem.priority/q1"
+                           " correlationId = [ numeric = 2 ] ]"
+                           " result = \"SUCCESS (0)\""
+                           " errorDescription = \"ERROR\" ]";
+
+    mwcu::MemOutStream out(s_allocator_p);
+    // operator<<
+    out << obj;
+
+    ASSERT_EQ(out.str(), expected);
+
+    // Print
+    out.reset();
+    obj.print(out, 0, -1);
+
+    ASSERT_EQ(out.str(), expected);
+}
+
+
 // ============================================================================
 //                                 MAIN PROGRAM
 // ----------------------------------------------------------------------------
