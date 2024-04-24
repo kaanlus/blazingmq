@@ -110,7 +110,97 @@ static void test1_breathingTest()
         ASSERT_EQ(obj1.errorDescription(), obj2.errorDescription());
     }
 
+        PV("Assignment Operator");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::ConfigureQueueResult::Enum result =
+            bmqt::ConfigureQueueResult::e_UNKNOWN;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
 
+        bmqa::ConfigureQueueStatus obj1(queueId,
+                                        result,
+                                        errorDescription,
+                                        s_allocator_p);
+        bmqa::ConfigureQueueStatus obj2(s_allocator_p);
+        obj2 = obj1;
+
+        ASSERT_EQ(bool(obj1), bool(obj2));
+        ASSERT_EQ(obj1.queueId(), obj2.queueId());
+        ASSERT_EQ(obj1.result(), obj2.result());
+        ASSERT_EQ(obj1.errorDescription(), obj2.errorDescription());
+    }
+}
+
+static void test2_comparison()
+// ------------------------------------------------------------------------
+// COMPARISION
+//
+// Concerns:
+//   Exercise 'bmqa::ConfigureQueueStatus' comparison operators
+//
+// Plan:
+//   1) Create two equivalent 'bmqa::ConfigureQueueStatus' objects and
+//      verify that they compare equal.
+//   2) Create two non-equivalent 'bmqa::ConfigureQueueStatus' objects and
+//      verify that they do not compare equal.
+//
+// Testing:
+//   bool operator==(const bmqa::ConfigureQueueStatus& lhs,
+//                   const bmqa::ConfigureQueueStatus& rhs);
+//   bool operator!=(const bmqa::ConfigureQueueStatus& lhs,
+//                   const bmqa::ConfigureQueueStatus& rhs);
+// ------------------------------------------------------------------------
+{
+    mwctst::TestHelper::printTestName("COMPARISON");
+
+    PV("Equality");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::ConfigureQueueResult::Enum result =
+            bmqt::ConfigureQueueResult::e_UNKNOWN;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::ConfigureQueueStatus obj1(queueId,
+                                        result,
+                                        errorDescription,
+                                        s_allocator_p);
+        bmqa::ConfigureQueueStatus obj2(obj1, s_allocator_p);
+
+        ASSERT(obj1 == obj2);
+    }
+
+    PV("Inequality");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::ConfigureQueueResult::Enum result1 =
+            bmqt::ConfigureQueueResult::e_SUCCESS;
+        const bmqt::ConfigureQueueResult::Enum result2 =
+            bmqt::ConfigureQueueResult::e_UNKNOWN;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::ConfigureQueueStatus obj1(queueId,
+                                        result1,
+                                        errorDescription,
+                                        s_allocator_p);
+        bmqa::ConfigureQueueStatus obj2(queueId,
+                                        result2,
+                                        errorDescription,
+                                        s_allocator_p);
+
+        ASSERT(obj1 != obj2);
+    }
 }
 // ============================================================================
 //                                 MAIN PROGRAM
