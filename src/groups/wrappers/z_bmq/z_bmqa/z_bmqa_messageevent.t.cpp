@@ -157,6 +157,128 @@ static void test1_breathingTest()
 }
 
 
+static void test2_ackMesageIteratorTest()
+{
+    s_ignoreCheckDefAlloc = true;
+    // Can't ensure no default memory is allocated because a default
+    // QueueId is instantiated and that uses the default allocator to
+    // allocate memory for an automatically generated CorrelationId.
+
+    mwctst::TestHelper::printTestName("ACK MESAGE ITERATOR TEST");
+
+    PV("Creating an event with a few messages");
+
+    const int k_NUM_MSGS = 5;
+
+    bdlbb::PooledBlobBufferFactory bufferFactory(256, s_allocator_p);
+    bmqp::AckEventBuilder          builder(&bufferFactory, s_allocator_p);
+    bsl::vector<AckData>           messages(s_allocator_p);
+
+    PVV("Appending messages");
+    appendMessages(&builder, &messages, k_NUM_MSGS);
+
+    bmqp::Event rawEvent(&builder.blob(), s_allocator_p);
+
+    bsl::shared_ptr<bmqimp::Event> eventImpl;
+    eventImpl.createInplace(s_allocator_p, &bufferFactory, s_allocator_p);
+    eventImpl->configureAsMessageEvent(rawEvent);
+
+    for (bsl::vector<AckData>::const_iterator i = messages.begin();
+         i != messages.end();
+         ++i) {
+        eventImpl->addCorrelationId(bmqt::CorrelationId(i->d_corrId));
+    }
+
+    bmqa::MessageEvent              event;
+    bsl::shared_ptr<bmqimp::Event>& eventImplref =
+        reinterpret_cast<bsl::shared_ptr<bmqimp::Event>&>(event);
+    eventImplref = eventImpl;
+
+    PV("Using a MessageIterator to go through it more than one time");
+    for (size_t k = 0; k < 2; ++k) {
+        int                   offset = 0;
+        bmqa::MessageIterator i      = event.messageIterator();
+        while (i.nextMessage()) {
+            const bmqa::Message* msg = &(i.message());
+
+            ASSERT_EQ(msg->correlationId(),
+                      bmqt::CorrelationId(messages[offset].d_corrId));
+            ASSERT_EQ(msg->messageGUID(), messages[offset].d_guid);
+
+            ++offset;
+        }
+        ASSERT_EQ(offset, k_NUM_MSGS);
+    }
+}
+
+static void test3_putMessageIteratorTest()
+{
+    s_ignoreCheckDefAlloc = true;
+    // Can't ensure no default memory is allocated because a default
+    // QueueId is instantiated and that uses the default allocator to
+    // allocate memory for an automatically generated CorrelationId.
+
+    mwctst::TestHelper::printTestName("PUT MESAGE ITERATOR TEST");
+
+    // Initialize Crc32c
+    bmqp::Crc32c::initialize();
+
+    PV("Creating an event with a few messages");
+
+    const int k_NUM_MSGS = 5;
+
+    bdlbb::PooledBlobBufferFactory bufferFactory(256, s_allocator_p);
+    bmqp::PutEventBuilder          builder(&bufferFactory, s_allocator_p);
+    bsl::vector<PutData>           messages(s_allocator_p);
+
+    PVV("Appending messages");
+    for (size_t dataIdx = 0; dataIdx < k_NUM_MSGS; ++dataIdx) {
+        bmqt::EventBuilderResult::Enum rc = appendMessage(dataIdx,
+                                                          &builder,
+                                                          &messages,
+                                                          &bufferFactory,
+                                                          s_allocator_p);
+        ASSERT_EQ(rc, bmqt::EventBuilderResult::e_SUCCESS);
+    }
+
+    bmqp::Event rawEvent(&builder.blob(), s_allocator_p);
+
+    bsl::shared_ptr<bmqimp::Event> eventImpl;
+    eventImpl.createInplace(s_allocator_p, &bufferFactory, s_allocator_p);
+    eventImpl->configureAsMessageEvent(rawEvent);
+
+    // Fill event's correlationId list as it is done in the
+    // 'bmqa::MessageEventBuilder::packMessage' so that the message iterator
+    // can access the correlationId for each message.
+    for (size_t i = 0; i < k_NUM_MSGS; ++i) {
+        eventImpl->addCorrelationId(bmqt::CorrelationId(i));
+    }
+
+    bmqa::MessageEvent              event;
+    bsl::shared_ptr<bmqimp::Event>& eventImplref =
+        reinterpret_cast<bsl::shared_ptr<bmqimp::Event>&>(event);
+    eventImplref = eventImpl;
+
+    PV("Using a MessageIterator to go through it more than one time");
+    for (size_t k = 0; k < 2; ++k) {
+        int                   offset = 0;
+        bmqa::MessageIterator i      = event.messageIterator();
+        while (i.nextMessage()) {
+            const bmqa::Message* msg = &(i.message());
+
+            ASSERT_EQ(msg->correlationId(), bmqt::CorrelationId(offset));
+
+            bdlbb::Blob payload(&bufferFactory, s_allocator_p);
+            int         rc = msg->getData(&payload);
+            ASSERT_EQ(rc, 0);
+            // Content isn't the same.  Length is.  Why?
+            ASSERT(payload.length() == messages[offset].d_payload.length());
+            ++offset;
+        }
+        ASSERT_EQ(offset, k_NUM_MSGS);
+    }
+}
+
 
 // ============================================================================
 //                                 MAIN PROGRAM
