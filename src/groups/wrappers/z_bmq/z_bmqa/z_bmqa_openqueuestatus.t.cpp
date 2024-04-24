@@ -37,7 +37,101 @@
 using namespace BloombergLP;
 using namespace bsl;
 
+// ============================================================================
+//                                    TESTS
+// ----------------------------------------------------------------------------
 
+static void test1_breathingTest()
+// ------------------------------------------------------------------------
+// BREATHING TEST
+//
+// Concerns:
+//   Exercise basic functionality before beginning testing in earnest.
+//   Probe that functionality to discover basic errors.
+//
+// Testing:
+//   Basic functionality.
+// ------------------------------------------------------------------------
+{
+    mwctst::TestHelper::printTestName("BREATHING TEST");
+
+    PV("Default Constructor");
+    {
+        bmqa::OpenQueueStatus obj(s_allocator_p);
+        ASSERT_EQ(bool(obj), true);
+        ASSERT_EQ(obj.result(), bmqt::OpenQueueResult::e_SUCCESS);
+        ASSERT_EQ(obj.errorDescription(), bsl::string("", s_allocator_p));
+    }
+
+    PV("Valued Constructor");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::OpenQueueResult::Enum result =
+            bmqt::OpenQueueResult::e_TIMEOUT;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::OpenQueueStatus obj(queueId,
+                                  result,
+                                  errorDescription,
+                                  s_allocator_p);
+
+        ASSERT_EQ(bool(obj), false);
+        ASSERT_EQ(obj.queueId(), queueId);
+        ASSERT_EQ(obj.result(), result);
+        ASSERT_EQ(obj.errorDescription(), errorDescription);
+    }
+
+    PV("Copy Constructor");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::OpenQueueResult::Enum result =
+            bmqt::OpenQueueResult::e_TIMEOUT;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::OpenQueueStatus obj1(queueId,
+                                   result,
+                                   errorDescription,
+                                   s_allocator_p);
+        bmqa::OpenQueueStatus obj2(obj1, s_allocator_p);
+
+        ASSERT_EQ(bool(obj2), bool(obj1));
+        ASSERT_EQ(obj1.queueId(), obj2.queueId());
+        ASSERT_EQ(obj1.result(), obj2.result());
+        ASSERT_EQ(obj1.errorDescription(), obj2.errorDescription());
+    }
+
+    PV("Assignment Operator");
+    {
+        const bmqt::CorrelationId correlationId =
+            bmqt::CorrelationId::autoValue();
+        const bmqa::QueueId queueId = bmqa::QueueId(correlationId,
+                                                    s_allocator_p);
+        const bmqt::OpenQueueResult::Enum result =
+            bmqt::OpenQueueResult::e_TIMEOUT;
+        const bsl::string errorDescription = bsl::string("ERROR",
+                                                         s_allocator_p);
+
+        bmqa::OpenQueueStatus obj1(queueId,
+                                   result,
+                                   errorDescription,
+                                   s_allocator_p);
+        bmqa::OpenQueueStatus obj2(s_allocator_p);
+        obj2 = obj1;
+
+        ASSERT_EQ(bool(obj1), bool(obj2));
+        ASSERT_EQ(obj1.queueId(), obj2.queueId());
+        ASSERT_EQ(obj1.result(), obj2.result());
+        ASSERT_EQ(obj1.errorDescription(), obj2.errorDescription());
+    }
+}
 
 
 // ============================================================================
